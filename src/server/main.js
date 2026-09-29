@@ -1,39 +1,41 @@
 import { io } from "./server.js";
-import { findUser, updateUserStatus, updateUserColor } from "./queries.js";
+// import { findUser, updateUserStatus, updateUserColor } from "./queries.js";
+import {
+  findUser,
+  updateUserStatus,
+  updateUserColor,
+  getAllUsers,
+} from "./queries-csv.js";
 
-export const keyboards = new Map([
-  [
-    "1",
-    {
-      color: "blue",
+export const keyboards = new Map([]);
+
+async function init() {
+  const data = await getAllUsers();
+  for (const user of data) {
+    keyboards.set(user.id, {
+      color: user.color,
       connected: false,
-    },
-  ],
-  [
-    "2",
-    {
-      color: "red",
-      connected: false,
-    },
-  ],
-  [
-    "3",
-    {
-      color: "vite",
-      connected: false,
-    },
-  ],
-]);
+    });
+  }
+}
+
+await init();
+
+function isKeyboardClient(socket) {
+  return socket.handshake.headers["user-agent"] === "node-XMLHttpRequest";
+}
 
 io.use(async (socket, next) => {
-  // if (socket.handshake.headers.host === "localhost:3000") return next();
+  if (!isKeyboardClient(socket)) return next();
 
   const { sessionID } = socket.handshake.auth;
   if (!sessionID) return next(new Error("Missing sessionID."));
 
-  const user = await findUser(sessionID, next);
-  if (!user || !user.id || !user.color)
+  const user = await findUser(sessionID);
+
+  if (!user || !user.id || !user.color) {
     return next(new Error("Keyboard not found."));
+  }
   if (user.id) {
     socket.keyboardID = user.id;
     socket.color = user.color;
@@ -45,22 +47,15 @@ io.use(async (socket, next) => {
 
 io.on("connection", async (socket) => {
   const id = socket.keyboardID;
-  const allSockets = await io.fetchSockets();
 
-  const { connected } = await updateUserStatus(id, true);
-
-  if (connected === true) {
-    socket.join(id);
+  if (isKeyboardClient(socket)) {
+    await updateUserStatus(id, true);
+    keyboards.set(id, { ...keyboards.get(id), connected: true });
     console.log("user connected:", id);
-
-    keyboards.set(id, { color: socket.color, connected: true });
-
-    for (const s of allSockets) {
-      for (const key of keyboards.keys()) {
-        s.emit("status", { ...keyboards.get(key), id: key });
-      }
-    }
   }
+
+  console.log({ ...keyboards.get(id) });
+  socket.broadcast.emit("status", { ...keyboards.get(id), id });
 
   socket.on("color", async (payload) => {
     const targetId = payload.split("-")[1];
@@ -68,29 +63,24 @@ io.on("connection", async (socket) => {
 
     const { color: updatedColor } = await updateUserColor(targetId, color);
 
-    if (updatedColor) {
-      io.to(targetId).emit("color", updatedColor);
-      keyboards.set(targetId, {
-        ...keyboards.get(targetId),
-        color: updatedColor,
-      });
-    }
+    keyboards.set(targetId, {
+      ...keyboards.get(targetId),
+      color: updatedColor,
+    });
+
+    socket.broadcast.emit("status", {
+      ...keyboards.get(targetId),
+      id: targetId,
+    });
   });
 
   socket.on("disconnect", async () => {
-    const { connected } = await updateUserStatus(id, false);
-
-    if (connected === false) {
-      socket.leave(id);
+    if (isKeyboardClient(socket)) {
+      await updateUserStatus(id, false);
       console.log("user disconnected:", id);
-
       keyboards.set(id, { ...keyboards.get(id), connected: false });
-
-      for (const s of allSockets) {
-        for (const key of keyboards.keys()) {
-          s.emit("status", { ...keyboards.get(key), id: key });
-        }
-      }
     }
+
+    socket.broadcast.emit("status", { ...keyboards.get(id), id });
   });
 });

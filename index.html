@@ -4,11 +4,48 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
+    <title>kbd</title>
     <link href="/src/client/style.css" rel="stylesheet">
   </head>
   <body class="bg-zinc-900 h-screen">
-    <div id="app" class="h-full"></div>
+    <main class="h-full text-white px-5 pt-7 lg:flex lg:gap-11 lg:justify-center lg:pt-40">
+      <div id="card-1" class="opacity-30 h-80 w-full border border-zinc-600 rounded-lg mb-7 relative p-5 grid lg:max-w-lg transition">
+        <span class="absolute flex justify-center top-[-1.25rem] left-4 bg-zinc-900 text-3xl w-9">1</span>
+        <div class="flex justify-end h-fit">
+          <span class="relative flex justify-center items-center h-3 w-3">
+            <span id="pingOuter-1" class="bg-zinc-500 absolute inline-flex h-full w-full rounded-full opacity-75 transition"></span>
+            <span id="pingInner-1" class="bg-zinc-500 relative inline-flex rounded-full h-2 w-2 transition"></span>
+          </span>
+        </div>
+        <div class="w-72 mx-auto h-fit relative">
+          <div id="color-1"></div>
+          <img src="keyboard-black.svg" class="opacity-90" alt="Keyboard 1 image">
+        </div>
+        <div class="flex gap-4 mx-auto self-end">
+          <button disabled id="red-1" class="text-zinc-100 bg-zinc-900 border border-zinc-600 hover:border-zinc-400 active:bg-zinc-800 mx-auto block py-2 px-5 text-md rounded-lg lg:py-1 lg:px-6 disabled:hover:bg-zinc-900 disabled:hover:border-zinc-600">Red</button>
+          <button disabled id="green-1" class="text-zinc-100 bg-zinc-900 border border-zinc-600 hover:border-zinc-400 active:bg-zinc-800 mx-auto block py-2 px-5 text-md rounded-lg lg:py-1 lg:px-6 disabled:hover:bg-zinc-900 disabled:hover:border-zinc-600">Green</button>
+          <button disabled id="blue-1" class="text-zinc-100 bg-zinc-900 border border-zinc-600 hover:border-zinc-400 active:bg-zinc-800 mx-auto block py-2 px-5 text-md rounded-lg lg:py-1 lg:px-6 disabled:hover:bg-zinc-900 disabled:hover:border-zinc-600">Blue</button>
+        </div>
+      </div>
+      <div id="card-2" class="opacity-30 h-80 w-full border border-zinc-600 rounded-lg relative p-5 grid lg:max-w-lg transition">
+        <span class="absolute flex justify-center top-[-1.25rem] left-4 bg-zinc-900 text-3xl w-9">2</span>
+        <div class="flex justify-end h-fit">
+          <span class="relative flex justify-center items-center h-3 w-3">
+            <span id="pingOuter-2" class="bg-zinc-500 absolute inline-flex h-full w-full rounded-full opacity-75"></span>
+            <span id="pingInner-2" class="bg-zinc-500 relative inline-flex rounded-full h-2 w-2"></span>
+          </span>
+        </div>
+        <div class="w-72 mx-auto h-fit relative">
+          <div id="color-2"></div>
+          <img src="keyboard-white.svg" class="opacity-90" alt="Keyboard 2 image">
+        </div>
+        <div class="flex gap-4 mx-auto self-end">
+          <button disabled id="red-2" class="text-zinc-100 bg-zinc-900 border border-zinc-600 hover:border-zinc-400 active:bg-zinc-800 mx-auto block py-2 px-5 text-md rounded-lg lg:py-1 lg:px-6 disabled:hover:bg-zinc-900 disabled:hover:border-zinc-600">Red</button>
+          <button disabled id="green-2" class="text-zinc-100 bg-zinc-900 border border-zinc-600 hover:border-zinc-400 active:bg-zinc-800 mx-auto block py-2 px-5 text-md rounded-lg lg:py-1 lg:px-6 disabled:hover:bg-zinc-900 disabled:hover:border-zinc-600">Green</button>
+          <button disabled id="blue-2" class="text-zinc-100 bg-zinc-900 border border-zinc-600 hover:border-zinc-400 active:bg-zinc-800 mx-auto block py-2 px-5 text-md rounded-lg lg:py-1 lg:px-6 disabled:hover:bg-zinc-900 disabled:hover:border-zinc-600">Blue</button>
+        </div>
+      </div>
+    </main>
     <script type="module" src="/src/client/main.js"></script>
   </body>
 </html>

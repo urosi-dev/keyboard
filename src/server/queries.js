@@ -1,19 +1,36 @@
 import pg from "pg";
 import { config } from "dotenv";
-const { Pool } = pg;
+const { Client } = pg;
 
 config();
 
-export const pool = new Pool({
-  host: process.env.DB_URL,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT,
-  user: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
+const client = new Client({
+  // host: process.env.DB_HOST,
+  // database: process.env.DB_NAME,
+  // port: process.env.DB_PORT,
+  // user: process.env.DB_USER,
+  // password: process.env.DB_PASS,
+  connectionString: process.env.DB_CONNECTION_STRING,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
+// client
+//   .connect()
+//   .then(() => {
+//     console.log("connected to database");
+//   })
+//   .catch((error) => {
+//     console.error(error);
+//   });
+
+/**
+ * @param {string} sessionID
+ * @returns {Promise}
+ */
 export const findUser = async (sessionID) =>
-  pool
+  client
     .query(
       `select
         keyboard.id,
@@ -27,10 +44,17 @@ export const findUser = async (sessionID) =>
       [sessionID],
     )
     .then((res) => res.rows[0])
-    .catch((error) => new Error(error));
+    .catch((error) => {
+      console.error(error);
+    });
 
+/**
+ * @param {string} keyboardID
+ * @param {boolean} status
+ * @returns {Promise}
+ */
 export const updateUserStatus = async (keyboardID, status) =>
-  pool
+  client
     .query(
       `update
         keyboard
@@ -43,10 +67,17 @@ export const updateUserStatus = async (keyboardID, status) =>
       [status, keyboardID],
     )
     .then((res) => res.rows[0])
-    .catch((error) => new Error(error));
+    .catch((error) => {
+      console.error(error);
+    });
 
+/**
+ * @param {string} keyboardID
+ * @param {string} color
+ * @returns {Promise}
+ */
 export const updateUserColor = async (keyboardID, color) =>
-  pool
+  client
     .query(
       `update
         keyboard
@@ -59,4 +90,6 @@ export const updateUserColor = async (keyboardID, color) =>
       [color, keyboardID],
     )
     .then((res) => res.rows[0])
-    .catch((error) => new Error(error));
+    .catch((error) => {
+      console.error(error);
+    });

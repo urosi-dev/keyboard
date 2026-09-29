@@ -1,4 +1,5 @@
 import { io } from "socket.io-client";
+import { ids } from "./main";
 
 export const socket = io({
   auth: { sessionID: import.meta.env.VITE_ID },
@@ -10,19 +11,43 @@ const colors = new Map([
   ["blue", "bg-blue-800"],
 ]);
 
+socket.on("connect_error", (err) => {
+  console.error(err.message);
+});
+
+socket.on("color", (color) => {
+  console.log("color", color);
+});
+
 socket.on("status", (status) => {
-  if (!status || status.id === "3") return;
+  if (!status) return;
 
   const id = status.id;
   const connected = status.connected;
+
+  console.log("status", status);
+
+  if (connected) {
+    const buttons = ids
+      .filter((i) => i.split("-")[1] === id)
+      .map((i) => document.getElementById(i));
+    buttons.forEach((button) => {
+      button.disabled = false;
+    });
+  }
 
   document
     .getElementById(`card-${id}`)
     .classList.toggle("opacity-30", !connected);
 
-  document.getElementById(`color-${id}`).className = `${colors.get(
-    status.color,
-  )} inset-[-7px] absolute -z-10 blur-sm transition duration-300`;
+  if (connected) {
+    document.getElementById(`color-${id}`).className = `${colors.get(
+      status.color,
+    )} inset-[-7px] absolute -z-10 blur-sm transition duration-300`;
+  } else {
+    document.getElementById(`color-${id}`).className =
+      "inset-[-7px] absolute -z-10 blur-sm transition duration-300";
+  }
 
   const pingOuterClasses =
     " absolute inline-flex h-full w-full rounded-full opacity-75";
@@ -49,5 +74,6 @@ export function updateColor(id) {
     )} inset-[-7px] absolute -z-10 blur-sm transition duration-[4000ms]`;
 
     socket.emit("color", id);
+    console.log("color", color);
   });
 }
