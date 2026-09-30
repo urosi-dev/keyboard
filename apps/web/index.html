@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./public/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>keyboard</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        font-family: Tahoma, sans-serif;
+      }
+
+      body {
+        background: #18181b;
+        color: #fff;
+      }
+
+      .main {
+        height: 100%;
+        padding: 28px 20px 0;
+      }
+
+      .keyboard-card {
+        position: relative;
+        display: grid;
+        width: 100%;
+        min-height: 320px;
+        gap: 72px;
+        margin-bottom: 28px;
+        padding: 20px;
+        border: 1px solid #52525b;
+        border-radius: 8px;
+        opacity: 0.3;
+        transition: opacity 150ms ease;
+        height: fit-content;
+      }
+
+      .keyboard-card:last-child {
+        margin-bottom: 0;
+      }
+
+      .keyboard-card[data-connected="true"] {
+        opacity: 1;
+      }
+
+      .card-number {
+        position: absolute;
+        top: -20px;
+        left: 16px;
+        display: flex;
+        justify-content: center;
+        width: 36px;
+        background: #18181b;
+        font-size: 30px;
+      }
+
+      .status {
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .status-indicator {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 12px;
+        height: 12px;
+      }
+
+      .status-outer {
+        position: absolute;
+        display: inline-flex;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: #71717a;
+        opacity: 0.75;
+        transition:
+          background-color 150ms ease,
+          opacity 150ms ease,
+          transform 150ms ease;
+      }
+
+      .status-inner {
+        position: relative;
+        display: inline-flex;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #71717a;
+        transition: background-color 150ms ease;
+      }
+
+      .keyboard-card[data-connected="true"] .status-outer {
+        background: #22c55e;
+        animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+      }
+
+      .keyboard-card[data-connected="true"] .status-inner {
+        background: #22c55e;
+      }
+
+      .keyboard-image {
+        position: relative;
+        width: 300px;
+        height: 100px;
+        margin: 0 auto;
+      }
+
+      .keyboard-image img {
+        display: block;
+        width: 300px;
+        height: 100px;
+        opacity: 0.9;
+      }
+
+      .color-glow {
+        position: absolute;
+        inset: -7px;
+        z-index: -1;
+        border-radius: inherit;
+        background: var(--glow, transparent);
+        filter: blur(8px);
+        opacity: 0;
+        transition:
+          opacity 400ms ease,
+          background-color 400ms ease;
+      }
+
+      .keyboard-card[data-effect="static"] .color-glow,
+      .keyboard-card[data-effect="static-no-store"] .color-glow,
+      .keyboard-card[data-effect="reactive"] .color-glow {
+        opacity: var(--brightness, 1);
+      }
+
+      /* .keyboard-card[data-effect="custom"] .color-glow { */
+      /*   background: #a1a1aa; */
+      /*   opacity: calc(var(--brightness, 1) * 0.6); */
+      /* } */
+
+      .keyboard-card[data-effect="none"] .color-glow {
+        opacity: 0;
+      }
+
+      .keyboard-card[data-effect="breath"] .color-glow,
+      .keyboard-card[data-effect="pulsate"] .color-glow {
+        animation: glow-breath 3s ease-in-out infinite;
+      }
+
+      .keyboard-card[data-effect="starlight"] .color-glow {
+        animation: glow-twinkle 1.4s ease-in-out infinite alternate;
+      }
+
+      .keyboard-card[data-effect="wave"] .color-glow {
+        background: linear-gradient(
+          90deg,
+          #dc2626,
+          #eab308,
+          #16a34a,
+          #06b6d4,
+          #1d4ed8,
+          #c026d3,
+          #dc2626
+        );
+        background-size: 200% 100%;
+        opacity: var(--brightness, 1);
+        animation: glow-wave 3s linear infinite;
+        animation-direction: reverse;
+      }
+
+      .keyboard-card[data-effect="wave"][data-direction="left"] .color-glow {
+        animation-direction: unset;
+      }
+
+      .keyboard-card[data-effect="spectrum"] .color-glow {
+        background: #dc2626;
+        opacity: var(--brightness, 1);
+        animation: glow-spectrum 6s linear infinite;
+      }
+
+      .controls {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        align-self: end;
+        margin: 0 auto;
+      }
+
+      .controls button {
+        padding: 6px 14px;
+        border: 1px solid #52525b;
+        border-radius: 8px;
+        background: #18181b;
+        color: #f4f4f5;
+        font-size: 14px;
+        cursor: pointer;
+      }
+
+      .controls button:hover {
+        border-color: #a1a1aa;
+      }
+
+      .controls button:active {
+        background: #27272a;
+      }
+
+      .controls button[aria-pressed="true"] {
+        border-color: #f4f4f5;
+        background: #27272a;
+      }
+
+      .controls input[type="color"] {
+        width: 36px;
+        height: 32px;
+        padding: 0;
+        border: 1px solid #52525b;
+        border-radius: 8px;
+        background: #18181b;
+        cursor: pointer;
+      }
+
+      .brightness {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+      }
+
+      .message {
+        min-height: 1.2em;
+        margin: 0;
+        color: #f87171;
+        font-size: 13px;
+      }
+
+      .diagnostics {
+        max-width: 100%;
+        max-height: 120px;
+        margin: 0;
+        padding: 8px;
+        overflow: auto;
+        border: 1px solid #52525b;
+        border-radius: 8px;
+        color: #a1a1aa;
+        font-size: 12px;
+        white-space: pre-wrap;
+      }
+
+      .keyboard-card[data-connected="false"] .controls {
+        pointer-events: none;
+      }
+
+      .control-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .controls button:focus-visible {
+        outline: 2px solid #a1a1aa;
+        outline-offset: 2px;
+      }
+
+      @keyframes glow-breath {
+        0%,
+        100% {
+          opacity: calc(var(--brightness, 1) * 0.15);
+        }
+        50% {
+          opacity: var(--brightness, 1);
+        }
+      }
+
+      @keyframes glow-twinkle {
+        from {
+          opacity: calc(var(--brightness, 1) * 0.3);
+        }
+        to {
+          opacity: var(--brightness, 1);
+        }
+      }
+
+      @keyframes glow-wave {
+        to {
+          background-position: 200% 0;
+        }
+      }
+
+      @keyframes glow-spectrum {
+        from {
+          filter: blur(8px) hue-rotate(0deg);
+        }
+        to {
+          filter: blur(8px) hue-rotate(360deg);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .color-glow {
+          animation: none !important;
+        }
+      }
+
+      @keyframes ping {
+        75%,
+        100% {
+          transform: scale(2);
+          opacity: 0;
+        }
+      }
+
+      @media (min-width: 1024px) {
+        .main {
+          display: flex;
+          justify-content: center;
+          gap: 44px;
+          padding-top: 160px;
+        }
+
+        .keyboard-card {
+          max-width: 512px;
+          margin-bottom: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="main">
+      <div
+        id="card-1"
+        class="keyboard-card"
+        data-keyboard-id="macos"
+        data-connected="false"
+        data-effect=""
+        data-color=""
+      >
+        <span class="card-number">1</span>
+
+        <div class="status">
+          <span class="status-indicator">
+            <span class="status-outer"></span>
+            <span class="status-inner"></span>
+          </span>
+        </div>
+
+        <div class="keyboard-image">
+          <div class="color-glow"></div>
+          <img
+            src="./public/keyboard-black.svg"
+            alt="Keyboard 1 image"
+            width="300"
+            height="120"
+          />
+        </div>
+
+        <div class="controls"></div>
+      </div>
+
+      <div
+        id="card-2"
+        class="keyboard-card"
+        data-keyboard-id="windows"
+        data-connected="false"
+        data-effect=""
+        data-color=""
+      >
+        <span class="card-number">2</span>
+
+        <div class="status">
+          <span class="status-indicator">
+            <span class="status-outer"></span>
+            <span class="status-inner"></span>
+          </span>
+        </div>
+
+        <div class="keyboard-image">
+          <div class="color-glow"></div>
+          <img
+            src="./public/keyboard-white.svg"
+            alt="Keyboard 2 image"
+            width="300"
+            height="120"
+          />
+        </div>
+
+        <div class="controls"></div>
+      </div>
+    </main>
+
+    <template id="controls-template">
+      <div class="control-row">
+        <button data-color="FF0000">Red</button>
+        <button data-color="00FF00">Green</button>
+        <button data-color="0000FF">Blue</button>
+        <input
+          type="color"
+          data-action="pick-color"
+          value="#ff0000"
+          aria-label="Custom colour"
+        />
+      </div>
+
+      <div class="control-row">
+        <button data-effect="none">Off</button>
+        <button data-effect="static">Static</button>
+        <button data-effect="wave" data-direction="left">Wave ←</button>
+        <button data-effect="wave" data-direction="right">Wave →</button>
+        <button data-effect="spectrum">Spectrum</button>
+        <button data-effect="breath">Breath</button>
+        <button data-effect="reactive">Reactive</button>
+        <button data-effect="starlight">Starlight</button>
+      </div>
+
+      <div class="control-row">
+        <label class="brightness">
+          Brightness
+          <input
+            type="range"
+            min="0"
+            max="255"
+            value="255"
+            data-action="brightness"
+          />
+        </label>
+      </div>
+    </template>
+
+    <script type="module" src="./index.js"></script>
+  </body>
+</html>
