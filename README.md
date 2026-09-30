@@ -6,6 +6,11 @@ The project uses WebSockets to connect a web interface to keyboard clients runni
 
 ![Screenshot of the web app](./keyboard.png)
 
+> TODO:
+> - add the OS specific client installation
+> - better handling of server startup
+> - add the librazermacos binary
+
 ## Structure
 
 ```text
@@ -55,11 +60,6 @@ KEYBOARD_MACOS_TOKEN=...
 ```
 
 The macOS client stores its current state in `apps/macos/state.json`.
-
-> TODO:
-> - add the OS specific client installation
-> - better handling of server startup
-> - add the librazermacos binary
 
 ## Running
 
