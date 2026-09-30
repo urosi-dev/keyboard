@@ -1,33 +1,15 @@
 {
   "name": "keyboard",
+  "author": "urosi-dev",
+  "license": "MIT",
+  "description": "Razer keyboard web app",
   "private": true,
   "version": "1.0.0",
-  "main": "./src/server/main.js",
   "type": "module",
-  "scripts": {
-    "dev": "nodemon src/server/main.js -w src/server",
-    "start": "NODE_ENV=production node src/server/main.js",
-    "build": "vite build"
-  },
-  "devDependencies": {
-    "autoprefixer": "^10.4.14",
-    "nodemon": "^2.0.20",
-    "postcss": "^8.4.24",
-    "tailwindcss": "^3.3.2",
-    "vite": "^4.0.4"
-  },
+
+  "scripts": {},
+
   "dependencies": {
-    "@socket.io/postgres-adapter": "^0.3.1",
-    "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
-    "express": "^4.18.2",
-    "pg": "^8.11.3",
-    "socket.io": "^4.6.2",
-    "socket.io-client": "^4.7.0",
-    "vite-express": "^0.9.1"
-  },
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
+    "ws": "^8.22.0"
+  }
 }
